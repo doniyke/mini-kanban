@@ -31,8 +31,7 @@
     methods: {
       deleteTicket(){
         axios.delete(this.apiUrl + this.routeColumn + '/' + this.routeId, this.jsonConfigNoAuth)
-        .then(response => {
-          console.log(response.data)
+        .then(() => {
           localStorage.clear()
           this.$emit('get-board-data')
         })

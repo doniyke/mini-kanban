@@ -37,9 +37,11 @@ export default {
       if (this.$route.params.column && this.$route.params.id){
         this.routeColumn = this.$route.params.column
         this.routeId = this.$route.params.id
+        this.pageLoading = false
       } else {
         this.routeColumn = null,
         this.routeId = null
+        this.pageLoading = false
       }
     })
 
@@ -53,7 +55,7 @@ export default {
       this.getBoardData()
       this.pageLoading = false
     }
-
+    this.pageLoading = false
     // this.getAllTasks()
 
   },
@@ -140,16 +142,19 @@ export default {
       const localCompletedData = JSON.parse(localStorage.getItem('3dMIniKabanCompletedData'))
       if (localTodoData && localTodoData !== null) {
         this.todoData = localTodoData
+        this.dataLoading = false
       }else {
         axios.get(this.apiUrl + 'todo?board='+ this.currentBoard, this.jsonConfigNoAuth)
         .then(response => {
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(response.data))
           this.todoData = response.data
+          this.dataLoading = false
         })
         .catch(error => {
           if (error) {
             this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
           }
+          this.dataLoading = false
         })
         .finally(() => this.dataLoading = false)
       }
@@ -209,47 +214,55 @@ export default {
       .then(response => {
         localStorage.setItem('3dMIniKabanBoardData', JSON.stringify(response.data))
         this.boards = response.data
+        this.dataLoading = false
         if (this.boards.length > 0) {
           this.currentBoard = this.boards[0].id
           this.currentBoardTitle = this.boards[0].title
+          this.dataLoading = false
         } else {
           this.currentBoard = null
           this.currentBoardTitle = null
+          this.dataLoading = false
         }
         this.getAllTasks()
+        this.dataLoading = false
       })
       .catch(error => {
         if (error) {
           this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly. Please refer to the README.md file for full setup information', {position: 'top', duration: false})
           setTimeout(this.$toast.clear, 3000)
         }
+        this.dataLoading = false
       })
       .finally(() => this.dataLoading = false)
     },
     addNewBoard() {
+      this.loading = true
       this.newBoardError = false
       const title = this.$refs.boardTitle.value
       if (title == '' || title == null) {
         this.newBoardErrorText = 'Please enter board title'
         this.newBoardError = true
+        this.loading = false
       } else {
         const boardData = {
           'id': Date.now(),
           'title' : title
         }
         axios.post(this.apiUrl + 'boards', boardData, this.jsonConfigNoAuth)
-        .then(response => {
-          console.log(response.data)
+        .then(() => {
           this.getBoardData()
           this.$refs.boardTitle.value = ''
-          this.$refs.modalClose.click()
+          this.$refs.modalBoardClose.click()
           this.$toast.success('Board Created Successfully', {position: 'top'});
+          this.loading = false
         })
         .catch(error => {
           if (error) {
             this.newBoardErrorText = 'Network Error, Please make sure JSON Server is setup and running properly'
             this.newBoardError = true
             this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+            this.loading = false
           }
         })
         .finally(() => this.loading = false)
@@ -257,6 +270,7 @@ export default {
       
     },
     addNewTicket(){
+      this.loading = true
       this.newBoardError = false
       const title = this.$refs.ticketTitle.value
       const ticketDescription = this.$refs.ticketDescription.value
@@ -266,6 +280,7 @@ export default {
       if (title == '' || title == null || ticketDescription == '' || ticketDescription == null) {
         this.newBoardErrorText = 'Please fill all fields'
         this.newBoardError = true
+        this.loading = false
       } else {
         const ticketData = {
           'id': Date.now(),
@@ -276,27 +291,27 @@ export default {
           'ticketType' : ticketType
         }
         axios.post(this.apiUrl + 'todo', ticketData, this.jsonConfigNoAuth)
-        .then(response => {
-          console.log(response.data)
+        .then(() => {
           this.getAllTasks()
           this.$refs.ticketTitle.value = ''
           this.$refs.ticketDescription.value = ''
           this.todoData.push(ticketData)
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(this.todoData))
-          this.$refs.modalClose.click()
+          this.$refs.modalTicketClose.click()
+          this.loading = false
         })
         .catch(error => {
           if (error) {
             this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
           }
+          this.loading = false
         })
         .finally(() => this.loading = false)
       }
     },
     deleteBoard(){
       axios.delete(this.apiUrl + 'boards/' + this.currentBoard, this.jsonConfigNoAuth)
-      .then(response => {
-        console.log(response.data)
+      .then(() => {
         localStorage.clear()
         this.getBoardData()
       })
@@ -308,28 +323,31 @@ export default {
       .finally(() => this.loading = false)
     },
     updateBoard() {
+      this.loading = true
       this.newBoardError = false
       const title = this.$refs.boardEditTitle.value
       if (title == '' || title == null) {
         this.newBoardErrorText = 'Please enter board title'
         this.newBoardError = true
+        this.loading = false
       } else {
         const boardData = {
           'title' : title
         }
         axios.put(this.apiUrl + 'boards/' + this.currentBoard, boardData, this.jsonConfigNoAuth)
-        .then(response => {
-          console.log(response.data)
+        .then(() => {
           const oldIndex = this.currentBoard
           localStorage.clear()
           this.getBoardData()
           this.changeBoard(oldIndex, title)
-          this.$refs.modalClose.click()
+          this.$refs.modalUpdateClose.click()
+          this.loading = false
         })
         .catch(error => {
           if (error) {
             this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
           }
+          this.loading = false
         })
         .finally(() => this.loading = false)
       }
@@ -494,7 +512,7 @@ export default {
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Create New Board</h5>
-            <button type="button" ref="modalClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" ref="modalBoardClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="addNewBoard">
@@ -508,7 +526,10 @@ export default {
                 </div>
               </div>
               <div class="d-grid">
-                <button type="button" class="btn btn-add-task" @click="addNewBoard()">
+                <button class="btn btn-add-task" type="button" disabled v-if="loading">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-add-task" @click="addNewBoard()" v-else>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;"><path d="M6 22h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2zm7-18 5 5h-5V4zM8 14h3v-3h2v3h3v2h-3v3h-2v-3H8v-2z"></path></svg>
                   Create New Board
                 </button>
@@ -525,7 +546,7 @@ export default {
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Edit Board</h5>
-            <button type="button" ref="modalClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" ref="modalUpdateClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form>
@@ -539,7 +560,10 @@ export default {
                 </div>
               </div>
               <div class="d-grid">
-                <button type="button" class="btn btn-add-task" @click="updateBoard()">
+                <button class="btn btn-add-task" type="button" disabled v-if="loading">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-add-task" @click="updateBoard()" v-else>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;"><path d="M6 22h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2zm7-18 5 5h-5V4zM8 14h3v-3h2v3h3v2h-3v3h-2v-3H8v-2z"></path></svg>
                   Update Board
                 </button>
@@ -556,7 +580,7 @@ export default {
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Create New Ticket</h5>
-            <button type="button" ref="modalClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" ref="modalTicketClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form>
@@ -584,7 +608,10 @@ export default {
                 </div>
               </div>
               <div class="d-grid">
-                <button type="button" class="btn btn-add-task" @click="addNewTicket()">
+                <button class="btn btn-add-task" type="button" disabled v-if="loading">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-add-task" @click="addNewTicket()" v-else>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;"><path d="M6 22h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2zm7-18 5 5h-5V4zM8 14h3v-3h2v3h3v2h-3v3h-2v-3H8v-2z"></path></svg>
                   Create New Ticket
                 </button>
