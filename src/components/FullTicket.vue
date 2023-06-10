@@ -22,8 +22,9 @@
             this.fullTicketData = response.data
         })
         .catch(error => {
-            console.log(error)
-            this.ticketNotFound = true
+            if (error) {
+                this.ticketNotFound = true
+            }
         })
         .finally(() => this.loading = false)
     },
@@ -36,7 +37,9 @@
           this.$emit('get-board-data')
         })
         .catch(error => {
-          console.log(error)
+            if (error) {
+                this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+            }
         })
         .finally(() => this.loading = false)
       },

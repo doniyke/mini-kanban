@@ -1,6 +1,7 @@
 <script>
 import MiniTicket from '../components/MiniTicket.vue'
 import FullTicket from '../components/FullTicket.vue'
+import PageLoader from '../components/PageLoader.vue'
 import draggable from 'vuedraggable';
 import axios from 'axios'
 export default {
@@ -8,6 +9,7 @@ export default {
   components: {
     MiniTicket,
     FullTicket,
+    PageLoader,
     draggable
   },
   data () {
@@ -24,10 +26,13 @@ export default {
       boards: [],
       currentBoardTitle: '',
       newBoardErrorText: '',
-      newBoardError: false
+      newBoardError: false,
+      pageLoading: true,
+      dataLoading: false
     }
   },
   mounted () {
+    this.pageLoading = true
     this.$watch('$route.path', () => {
       if (this.$route.params.column && this.$route.params.id){
         this.routeColumn = this.$route.params.column
@@ -43,15 +48,16 @@ export default {
 
     if (localBoardsData && localBoardsData !== null) {
       this.boards = localBoardsData
+      this.pageLoading = false
     }else {
       this.getBoardData()
+      this.pageLoading = false
     }
 
-    this.getAllTasks()
+    // this.getAllTasks()
 
   },
   methods: {
-    //on each drag change, update store data and update json data
     dataChange (event, col) {
       if (event.added) {
         const CurrentData = event.added.element
@@ -76,7 +82,6 @@ export default {
       if (event.removed) {
         const CurrentData = event.removed.element
         const column = col
-        // const oldIndex = event.removed.oldIndex
         if (column == 1) {
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(this.todoData))
           this.deleteTaskFromApi (CurrentData, column)
@@ -100,7 +105,9 @@ export default {
       const taskId = task.id
       axios.delete(this.apiUrl + dbcolumn + '/' + taskId, this.jsonConfigNoAuth)
       .catch(error => {
-        console.log(error)
+        if (error) {
+          this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+        }
       })
       .finally(() => this.loading = false)
 
@@ -109,7 +116,9 @@ export default {
       const dbcolumn = column == 1 ? 'todo' : (column == 2 ? 'inprogress' : (column == 3 ? 'testing' : (column == 4 ? 'completed' : '')))
       axios.post(this.apiUrl + dbcolumn, task, this.jsonConfigNoAuth)
       .catch(error => {
-        console.log(error)
+        if (error) {
+          this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+        }
       })
       .finally(() => this.loading = false)
 
@@ -124,6 +133,7 @@ export default {
       this.getAllTasks()
     },
     getAllTasks () {
+      this.dataLoading = true
       const localTodoData = JSON.parse(localStorage.getItem('3dMIniKabanTodoData'))
       const localProgressData = JSON.parse(localStorage.getItem('3dMIniKabanProgressData'))
       const localTestingData = JSON.parse(localStorage.getItem('3dMIniKabanTestingData'))
@@ -137,9 +147,11 @@ export default {
           this.todoData = response.data
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+          }
         })
-        .finally(() => this.loading = false)
+        .finally(() => this.dataLoading = false)
       }
 
       if (localProgressData && localProgressData !== null) {
@@ -151,9 +163,11 @@ export default {
           this.progressData = response.data
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly.', {position: 'top-right'})
+          }
         })
-        .finally(() => this.loading = false)
+        .finally(() => this.dataLoading = false)
       }
 
       if (localTestingData && localTestingData !== null) {
@@ -165,9 +179,11 @@ export default {
           this.testingData = response.data
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+          }
         })
-        .finally(() => this.loading = false)
+        .finally(() => this.dataLoading = false)
       }
 
       if (localCompletedData && localCompletedData !== null) {
@@ -179,12 +195,15 @@ export default {
           this.completedData = response.data
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly.', {position: 'top-right'})
+          }
         })
-        .finally(() => this.loading = false)
+        .finally(() => this.dataLoading = false)
       }
     },
     getBoardData() {
+      this.dataLoading = true
       localStorage.clear()
       axios.get(this.apiUrl + 'boards', this.jsonConfigNoAuth)
       .then(response => {
@@ -198,13 +217,14 @@ export default {
           this.currentBoardTitle = null
         }
         this.getAllTasks()
-        // this.routeColumn = null,
-        // this.routeId = null
       })
       .catch(error => {
-        console.log(error)
+        if (error) {
+          this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly. Please refer to the README.md file for full setup information', {position: 'top', duration: false})
+          setTimeout(this.$toast.clear, 3000)
+        }
       })
-      .finally(() => this.loading = false)
+      .finally(() => this.dataLoading = false)
     },
     addNewBoard() {
       this.newBoardError = false
@@ -223,9 +243,14 @@ export default {
           this.getBoardData()
           this.$refs.boardTitle.value = ''
           this.$refs.modalClose.click()
+          this.$toast.success('Board Created Successfully', {position: 'top'});
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.newBoardErrorText = 'Network Error, Please make sure JSON Server is setup and running properly'
+            this.newBoardError = true
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+          }
         })
         .finally(() => this.loading = false)
       }
@@ -261,7 +286,9 @@ export default {
           this.$refs.modalClose.click()
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+          }
         })
         .finally(() => this.loading = false)
       }
@@ -274,7 +301,9 @@ export default {
         this.getBoardData()
       })
       .catch(error => {
-        console.log(error)
+        if (error) {
+          this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly.', {position: 'top-right'})
+        }
       })
       .finally(() => this.loading = false)
     },
@@ -298,7 +327,9 @@ export default {
           this.$refs.modalClose.click()
         })
         .catch(error => {
-          console.log(error)
+          if (error) {
+            this.$toast.error('Network Error, Please make sure JSON Server is setup and running properly', {position: 'top-right'})
+          }
         })
         .finally(() => this.loading = false)
       }
@@ -310,7 +341,10 @@ export default {
 
 <template>
   <main>
-    <div class="container-fluid">
+    <div v-if="pageLoading">
+      <PageLoader />
+    </div>
+    <div class="container-fluid" v-else>
       <div class="row g-2">
         <div class="col-md-2 side-nav shadow">
           <div class="py-3">
@@ -379,7 +413,10 @@ export default {
               <FullTicket :route-column="routeColumn" :route-id="routeId" @get-board-data="getBoardData"/>
             </div>
             <div class="pt-4 ticket-column" v-else>
-              <div class="row ticket-data-column p-3">
+              <div v-if="dataLoading">
+                <PageLoader />
+              </div>
+              <div class="row ticket-data-column p-3" v-else>
                 <div class="col-md-3 mb-4">
                   <h4>Todo ({{ todoData.length }})</h4>
                   <div>
