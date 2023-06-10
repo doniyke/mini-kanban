@@ -2,20 +2,30 @@
   import axios from 'axios'
   export default {
     props: {
-      ticketData: {
-        type:Object,
+      routeColumn: {
+        type:String,
         required: true
       },
-      currentColumn: {
-        type:Number,
+      routeId: {
         required:true
       }
     },
-    computed: {
-      getCurrentColumn() {
-        const column = this.currentColumn == 1 ? 'todo' : (this.currentColumn == 2 ? 'inprogress' : (this.currentColumn == 3 ? 'testing' : (this.currentColumn == 3 ? 'completed' : '')))
-        return column
-      }
+    data(){
+        return{
+            fullTicketData: null,
+            ticketNotFound: false
+        }
+    },
+    mounted () {
+        axios.get(this.apiUrl + this.routeColumn + '/' + this.routeId, this.jsonConfigNoAuth)
+        .then(response => {
+            this.fullTicketData = response.data
+        })
+        .catch(error => {
+            console.log(error)
+            this.ticketNotFound = true
+        })
+        .finally(() => this.loading = false)
     },
     methods: {
       deleteTicket(){
@@ -38,20 +48,20 @@
   }
 </script>
 <template>
-  <div class="ticket-data shadow mb-3 p-3">
-    <h5>{{ ticketData.title }}</h5>
-    <p>
-      {{ ticketData.shortDescription }}
-    </p>
-    <div class="d-flex justify-content-between">
-      <div>
-        <button class="btn btn-add-task btn-sm" @click="fullTicket()">
-          view Full Ticket
-        </button>
-      </div>
-      <div>
-        <button class="btn btn-danger btn-sm" @click="deleteTicket()">Delete This Ticket</button>
-      </div>
+  <div class="mb-3 p-3">
+    <div v-if="ticketNotFound">
+        <div class="alert alert-danger">
+            Sorry Ticket Not Found
+        </div>
+        <RouterLink to="/" class="btn btn-actions">Back To Board</RouterLink>
+    </div>
+    <div v-else>
+        <div v-if="fullTicketData">
+            <h5>{{ fullTicketData.title }}</h5>
+            <p>
+            {{ fullTicketData.shortDescription }}
+            </p>
+        </div>
     </div>
   </div>
 </template>
@@ -72,6 +82,12 @@
   .btn-add-task {
     background:#8400f7;
     color: #fff;
+    font-weight: 600;
+  }
+  .btn-actions {
+    background:transparent;
+    color: #8400f7;
+    border: 1px solid #8400f7;
     font-weight: 600;
   }
 </style>

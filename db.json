@@ -1,0 +1,55 @@
+{
+  "todo": [
+    {
+      "id": 2,
+      "title": "json-server",
+      "shortDescription": "typicode",
+      "fullDescription": "full description over here",
+      "board": 2
+    },
+    {
+      "id": 1,
+      "title": "json-server",
+      "shortDescription": "typicode",
+      "fullDescription": "full description over here",
+      "board": 1
+    }
+  ],
+  "inprogress": [
+    {
+      "id": 4,
+      "title": "json-server",
+      "shortDescription": "typicode",
+      "fullDescription": "full description over here",
+      "board": 1
+    }
+  ],
+  "testing": [],
+  "completed": [],
+  "boards": [
+    {
+      "title": "Client Frontend Developments",
+      "id": 1
+    },
+    {
+      "title": "test board goo",
+      "id": 3
+    },
+    {
+      "title": "test agains",
+      "id": 1686332941117
+    },
+    {
+      "id": 1686332989477,
+      "title": "another test board"
+    },
+    {
+      "title": "etetec",
+      "id": 1686333224877
+    },
+    {
+      "id": 1686333236376,
+      "title": "test"
+    }
+  ]
+}
