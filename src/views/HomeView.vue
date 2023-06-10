@@ -56,8 +56,6 @@ export default {
       this.pageLoading = false
     }
     this.pageLoading = false
-    // this.getAllTasks()
-
   },
   methods: {
     dataChange (event, col) {

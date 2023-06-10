@@ -19,7 +19,8 @@ app.use(router)
 app.use(VueAxios, axios)
 app.use(Toaster)
 
-app.config.globalProperties.apiUrl = 'http://localhost:3000/'
+app.config.globalProperties.apiUrl = 'http://localhost:3000/' //Local JSON SERVER API URL
+
 app.config.globalProperties.jsonConfigNoAuth = {
     headers: {
     'Content-Type': 'application/json'
