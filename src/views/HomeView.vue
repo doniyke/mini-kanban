@@ -28,6 +28,16 @@ export default {
     }
   },
   mounted () {
+    this.$watch('$route.path', () => {
+      if (this.$route.params.column && this.$route.params.id){
+        this.routeColumn = this.$route.params.column
+        this.routeId = this.$route.params.id
+      } else {
+        this.routeColumn = null,
+        this.routeId = null
+      }
+    })
+
     localStorage.clear()
     const localBoardsData = JSON.parse(localStorage.getItem('3dMIniKabanBoardData'))
 
@@ -46,8 +56,6 @@ export default {
       if (event.added) {
         const CurrentData = event.added.element
         const column = col
-        console.log ('current Data', CurrentData)
-        console.log ('Column', column)
         if (column == 1) {
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(this.todoData))
           this.addTaskToApi(CurrentData, column)
@@ -68,10 +76,7 @@ export default {
       if (event.removed) {
         const CurrentData = event.removed.element
         const column = col
-        const oldIndex = event.removed.oldIndex
-        console.log ('current Data', CurrentData)
-        console.log ('Column', column)
-        console.log ('oldIndex', oldIndex)
+        // const oldIndex = event.removed.oldIndex
         if (column == 1) {
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(this.todoData))
           this.deleteTaskFromApi (CurrentData, column)
@@ -134,7 +139,6 @@ export default {
       }else {
         axios.get(this.apiUrl + 'todo?board='+ this.currentBoard, this.jsonConfigNoAuth)
         .then(response => {
-          console.log(response.data)
           localStorage.setItem('3dMIniKabanTodoData', JSON.stringify(response.data))
           this.todoData = response.data
         })
@@ -149,7 +153,6 @@ export default {
       }else {
         axios.get(this.apiUrl + 'inprogress?board='+ this.currentBoard, this.jsonConfigNoAuth)
         .then(response => {
-          console.log(response.data)
           localStorage.setItem('3dMIniKabanProgressData', JSON.stringify(response.data))
           this.progressData = response.data
         })
@@ -164,7 +167,6 @@ export default {
       }else {
         axios.get(this.apiUrl + 'testing?board='+ this.currentBoard, this.jsonConfigNoAuth)
         .then(response => {
-          console.log(response.data)
           localStorage.setItem('3dMIniKabanTestingData', JSON.stringify(response.data))
           this.testingData = response.data
         })
@@ -179,7 +181,6 @@ export default {
       }else {
         axios.get(this.apiUrl + 'completed?board='+ this.currentBoard, this.jsonConfigNoAuth)
         .then(response => {
-          console.log(response.data)
           localStorage.setItem('3dMIniKabanCompletedData', JSON.stringify(response.data))
           this.completedData = response.data
         })
@@ -193,12 +194,18 @@ export default {
       localStorage.clear()
       axios.get(this.apiUrl + 'boards', this.jsonConfigNoAuth)
       .then(response => {
-        console.log(response.data)
         localStorage.setItem('3dMIniKabanBoardData', JSON.stringify(response.data))
         this.boards = response.data
-        this.currentBoard = this.boards[0].id
-        this.currentBoardTitle = this.boards[0].title
+        if (this.boards.length > 0) {
+          this.currentBoard = this.boards[0].id
+          this.currentBoardTitle = this.boards[0].title
+        } else {
+          this.currentBoard = null
+          this.currentBoardTitle = null
+        }
         this.getAllTasks()
+        // this.routeColumn = null,
+        // this.routeId = null
       })
       .catch(error => {
         console.log(error)
@@ -221,6 +228,7 @@ export default {
           console.log(response.data)
           this.getBoardData()
           this.$refs.boardTitle.value = ''
+          this.$refs.modalClose.click()
         })
         .catch(error => {
           console.log(error)
@@ -356,7 +364,7 @@ export default {
                   <h2>{{ currentBoardTitle }}</h2>
                 </div>
                 <div>
-                  <button class="btn btn-add-task btn-sm me-2 d-none d-md-inline" data-bs-toggle="modal" data-bs-target="#createNewTicketModal">
+                  <button class="btn btn-add-task btn-sm me-2 d-none d-md-inline" data-bs-toggle="modal" data-bs-target="#createNewTicketModal" v-if="boards.length > 0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;"><path d="M6 22h12a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2zm7-18 5 5h-5V4zM8 14h3v-3h2v3h3v2h-3v3h-2v-3H8v-2z"></path></svg>
                     Create New Ticket
                   </button>
@@ -365,16 +373,16 @@ export default {
                   </a>
 
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <li><a class="dropdown-item" href="#">Add New Ticket</a></li>
+                    <li><a class="dropdown-item" href="#" v-if="boards.length > 0" data-bs-toggle="modal" data-bs-target="#createNewTicketModal">Add New Ticket</a></li>
                     <li><a href="#" data-bs-toggle="modal" data-bs-target="#createNewBoardModal" class="dropdown-item">Create New Board</a></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editNewBoardModal">Edit Board Title</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" @click="deleteBoard()">Delete This Board</a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editNewBoardModal" v-if="boards.length > 0">Edit Board Title</a></li>
+                    <li><a class="dropdown-item text-danger" href="#" @click="deleteBoard()" v-if="boards.length > 0">Delete This Board</a></li>
                   </ul>
                 </div>
               </div>
             </div>
             <div v-if="routeColumn && routeId">
-              <FullTicket :route-column="routeColumn" :route-id="routeId"/>
+              <FullTicket :route-column="routeColumn" :route-id="routeId" @get-board-data="getBoardData"/>
             </div>
             <div class="pt-4 ticket-column" v-else>
               <div class="row ticket-data-column p-3">
@@ -450,15 +458,15 @@ export default {
     </div>
 
     <!-- Create New Board Modal -->
-    <div class="modal fade" id="createNewBoardModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" ref="createNewBoardModal" id="createNewBoardModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Create New Board</h5>
-            <button type="button" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" ref="modalClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form>
+            <form @submit.prevent="addNewBoard">
               <div class="form-group mb-3">
                 <label>Board Title</label>
                 <input type="text" class="form-control" ref="boardTitle">
@@ -512,12 +520,12 @@ export default {
     </div>
 
     <!-- Create New Ticket Modal -->
-    <div class="modal fade" id="createNewTicketModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" ref="createNewTicketModal" id="createNewTicketModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="staticBackdropLabel">Create New Ticket</h5>
-            <button type="button" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" ref="modalClose" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form>

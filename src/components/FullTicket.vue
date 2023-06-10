@@ -29,7 +29,7 @@
     },
     methods: {
       deleteTicket(){
-        axios.delete(this.apiUrl + this.getCurrentColumn + '/' + this.ticketData.id, this.jsonConfigNoAuth)
+        axios.delete(this.apiUrl + this.routeColumn + '/' + this.routeId, this.jsonConfigNoAuth)
         .then(response => {
           console.log(response.data)
           localStorage.clear()
@@ -43,6 +43,10 @@
       },
       fullTicket() {
         this.$router.push({ name: 'fullticket', params: { column: this.getCurrentColumn, id: this.ticketData.id } })
+      },
+      backToBoards(){
+        this.$router.push('/')
+        this.$emit('get-board-data')
       }
     }
   }
@@ -53,14 +57,31 @@
         <div class="alert alert-danger">
             Sorry Ticket Not Found
         </div>
-        <RouterLink to="/" class="btn btn-actions">Back To Board</RouterLink>
+        <button type="button" class="btn btn-actions" @click="backToBoards">Back To Board</button>
     </div>
     <div v-else>
         <div v-if="fullTicketData">
-            <h5>{{ fullTicketData.title }}</h5>
-            <p>
-            {{ fullTicketData.shortDescription }}
-            </p>
+            <div class="shadow p-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Ticket Title: {{ fullTicketData.title }}</h5>
+                        <p>
+                        Ticket Description: {{ fullTicketData.fullDescription }}
+                        </p>
+                        <p>
+                            Ticket Type/Category: {{ fullTicketData.ticketType }}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button class="mb-3 btn btn-add-task">Copy This Ticket Link</button>
+                            <button class="btn btn-outline-danger mb-3">Delete This Ticket</button>
+                            <button type="button" class="btn btn-actions" @click="backToBoards">Back To Board</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
   </div>
