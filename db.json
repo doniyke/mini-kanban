@@ -2,7 +2,16 @@
   "todo": [],
   "inprogress": [],
   "testing": [],
-  "completed": [],
+  "completed": [
+    {
+      "id": 1686363053303,
+      "title": "Figma Design",
+      "shortDescription": "Design a fitting figma page in line with the proje",
+      "fullDescription": "Design a fitting figma page in line with the project provided specifications and documentation. Please contact the project manager for details on how to communicate with the client",
+      "board": 1686361058154,
+      "ticketType": "New Feature"
+    }
+  ],
   "boards": [
     {
       "id": 1686361058154,

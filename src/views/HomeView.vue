@@ -96,12 +96,9 @@ export default {
       }
     },
     deleteTaskFromApi (task, column) {
-      const dbcolumn = column == 1 ? 'todo' : (column == 2 ? 'inprogress' : (column == 3 ? 'testing' : (column == 3 ? 'completed' : '')))
+      const dbcolumn = column == 1 ? 'todo' : (column == 2 ? 'inprogress' : (column == 3 ? 'testing' : (column == 4 ? 'completed' : '')))
       const taskId = task.id
       axios.delete(this.apiUrl + dbcolumn + '/' + taskId, this.jsonConfigNoAuth)
-      .then(response => {
-        console.log(response.data)
-      })
       .catch(error => {
         console.log(error)
       })
@@ -109,11 +106,8 @@ export default {
 
     },
     addTaskToApi (task, column) {
-      const dbcolumn = column == 1 ? 'todo' : (column == 2 ? 'inprogress' : (column == 3 ? 'testing' : (column == 3 ? 'completed' : '')))
+      const dbcolumn = column == 1 ? 'todo' : (column == 2 ? 'inprogress' : (column == 3 ? 'testing' : (column == 4 ? 'completed' : '')))
       axios.post(this.apiUrl + dbcolumn, task, this.jsonConfigNoAuth)
-      .then(response => {
-        console.log(response.data)
-      })
       .catch(error => {
         console.log(error)
       })

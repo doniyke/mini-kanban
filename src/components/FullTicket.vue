@@ -33,7 +33,6 @@
         .then(response => {
           console.log(response.data)
           localStorage.clear()
-          // this.getBoardData()
           this.$emit('get-board-data')
         })
         .catch(error => {
