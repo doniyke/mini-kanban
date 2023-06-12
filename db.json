@@ -15,6 +15,14 @@
       "fullDescription": "kj",
       "board": 1686361058154,
       "ticketType": "New Feature"
+    },
+    {
+      "id": 1686528287328,
+      "title": "Test Ticket for video",
+      "shortDescription": "This is just a test",
+      "fullDescription": "This is just a test",
+      "board": 1686528254623,
+      "ticketType": "Blocker"
     }
   ],
   "inprogress": [
@@ -27,14 +35,6 @@
       "ticketType": "New Feature"
     },
     {
-      "id": 1686363053303,
-      "title": "Figma Design",
-      "shortDescription": "Design a fitting figma page in line with the proje",
-      "fullDescription": "Design a fitting figma page in line with the project provided specifications and documentation. Please contact the project manager for details on how to communicate with the client",
-      "board": 1686361058154,
-      "ticketType": "New Feature"
-    },
-    {
       "id": 1686439743733,
       "title": "kk",
       "shortDescription": "mm",
@@ -44,7 +44,16 @@
     }
   ],
   "testing": [],
-  "completed": [],
+  "completed": [
+    {
+      "id": 1686363053303,
+      "title": "Figma Design",
+      "shortDescription": "Design a fitting figma page in line with the proje",
+      "fullDescription": "Design a fitting figma page in line with the project provided specifications and documentation. Please contact the project manager for details on how to communicate with the client",
+      "board": 1686361058154,
+      "ticketType": "New Feature"
+    }
+  ],
   "boards": [
     {
       "title": "Project 1 MVP Developments",
@@ -89,6 +98,10 @@
     {
       "id": 1686440111547,
       "title": "hello board"
+    },
+    {
+      "id": 1686528254623,
+      "title": "A new test Board"
     }
   ]
 }
