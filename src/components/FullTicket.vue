@@ -16,6 +16,11 @@ export default {
       ticketNotFound: false
     }
   },
+  computed: {
+   copyLink() {
+    return window.location.href
+   }
+  },
   mounted () {
     axios.get(this.apiUrl + this.routeColumn + '/' + this.routeId, this.jsonConfigNoAuth)
     .then(response => {
@@ -33,6 +38,8 @@ export default {
       axios.delete(this.apiUrl + this.routeColumn + '/' + this.routeId, this.jsonConfigNoAuth)
       .then(() => {
         localStorage.clear()
+        this.$toast.success('Ticket Deleted', {position: 'top-right'})
+        this.$router.push('/')
         this.$emit('get-board-data')
       })
       .catch(error => {
@@ -48,6 +55,12 @@ export default {
     backToBoards(){
       this.$router.push('/')
       this.$emit('get-board-data')
+    },
+    copiedSuccess() {
+      this.$toast.success('Ticket Link Copied', {position: 'top-right'})
+    },
+    copiedError() {
+      this.$toast.error('Error Copying Link', {position: 'top-right'})
     }
   }
 }
@@ -75,8 +88,8 @@ export default {
             </div>
             <div class="col-md-4">
               <div class="d-grid">
-                <button class="mb-3 btn btn-add-task">Copy This Ticket Link</button>
-                <button class="btn btn-outline-danger mb-3">Delete This Ticket</button>
+                <button class="mb-3 btn btn-add-task" type="button" v-clipboard:copy="copyLink" v-clipboard:success="copiedSuccess" v-clipboard:error="copiedError">Copy This Ticket Link</button>
+                <button class="btn btn-outline-danger mb-3" @click="deleteTicket">Delete This Ticket</button>
                 <button type="button" class="btn btn-actions" @click="backToBoards">Back To Board</button>
               </div>
             </div>

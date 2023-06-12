@@ -6,7 +6,8 @@ import VueAxios from 'vue-axios'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import Toaster from '@meforma/vue-toaster';
+import Toaster from '@meforma/vue-toaster'
+import VueClipboard from 'vue3-clipboard'
 
 
 import App from './App.vue'
@@ -18,6 +19,10 @@ app.use(createPinia())
 app.use(router)
 app.use(VueAxios, axios)
 app.use(Toaster)
+app.use(VueClipboard,{
+    autoSetContainer: true,
+    appendToBody: true}
+)
 
 app.config.globalProperties.apiUrl = 'http://localhost:3000/' //Local JSON SERVER API URL
 

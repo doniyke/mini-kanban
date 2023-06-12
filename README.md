@@ -63,3 +63,6 @@ npm run lint
 ## Customize configuration
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Watch Setup and Usage Basic Video For Better Understaning
+[Screencast from 12-06-2023 01:03:05.webm](https://github.com/doniyke/mini-kanban/assets/25855947/27098d20-272e-471a-af5b-f288f0270dde)
